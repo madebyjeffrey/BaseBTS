@@ -22,7 +22,7 @@ public protocol HasColour : Entity {
     var colour: Colour { get }
 }
 
-public enum Location {
+public enum Location : Equatable {
     case entity(UUID)
     case position(x: Int, y: Int)
 }

@@ -39,10 +39,13 @@ public class MovementSystem : System {
                         .filter { try $0.location.hasSameLocation(as: destination, in: world) }
                     
                     if entities.isEmpty {
-                        e.pushWaypoint(Waypoint(target: .position(destination), speed: waypoint.speed))
+                        e.location = .position(destination)
                     } else {
-                        e.pushWaypoint(Waypoint(target: .entity(entities[0].id), speed: waypoint.speed))
+                        e.location = .entity(entities[0].id)
                     }
+                    
+                    // restore original waypoint, we haven't arrived yet!
+                    e.pushWaypoint(waypoint)
                 } else {
                     // case 2: we have reached it or otherwise would exceed it
                     e.location = waypoint.target
