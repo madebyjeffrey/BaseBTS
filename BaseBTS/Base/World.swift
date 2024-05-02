@@ -14,12 +14,20 @@ public class World {
         self.entities = []
     }
     
-    public init(entities: [Entity]) {
-        self.entities = entities
+    public func count() -> Int {
+        entities.count
     }
-    
+        
     public func addEntity(_ entity: Entity) {
         entities.append(entity)
+    }
+    
+    public func updateEntity(_ entity: Entity) {
+        let i = entities.lastIndex(where: { $0.id == entity.id })
+        
+        if let i {
+            entities[i] = entity
+        }
     }
     
     public func removeEntity(byId id: UUID) {
@@ -34,14 +42,6 @@ public class World {
         entities
     }
     
-    public func getEntities(byComponent id: Identifier) -> [Entity] {
-        entities.filter({ $0.hasComponent(byId: id) })
-    }
-    
-    public func getEntities<C: Component>(byComponent id: Identifier, _ predicate: (C) -> Bool) -> [Entity] {
-        entities.filter({ $0.hasComponent(byId: id, predicate) })
-    }
-    
     public func getEntity(byId id: UUID) throws -> Entity {
         let result = entities.filter({ $0.id == id }).first
         
@@ -49,6 +49,12 @@ public class World {
             return result.unsafelyUnwrapped
         } else {
             throw ECSErrors.noEntityWithThatId
-        }        
+        }
+    }
+       
+    public func getEntities<T>(_ mapper: (Entity) -> T?) -> [T] {
+        entities.map { mapper($0) }
+            .filter { $0 != nil }
+            .map { $0.unsafelyUnwrapped }
     }
 }

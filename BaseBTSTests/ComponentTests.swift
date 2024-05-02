@@ -17,27 +17,4 @@ final class ComponentTests: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-
-    func testTwoComponents() {
-        let c1 = TestComponent(name: "Hello")
-        let c2 = SecondTestComponent()
-        
-        print("TestComponent id \(c1.identifier.id)")
-        
-        XCTAssertNotEqual(c1.identifier, c2.identifier)
-    }
-    
-    func testOneComponentEquality() {
-        let c1 = TestComponent(name: "Hello")
-        let c2 = TestComponent(name: "Hello")
-        
-        XCTAssertEqual(c1, c2)
-    }
-    
-    func testOneComponentNotEqual() {
-        let c1 = TestComponent(name: "H1")
-        let c2 = TestComponent(name: "H2")
-        
-        XCTAssertNotEqual(c1, c2)
-    }
 }

@@ -8,15 +8,10 @@
 import Foundation
 import BaseBTS
 
-public struct TestComponent : Component, Equatable {
-    public var name: String;
+public protocol HasF1 : Entity {    
+    var f1: String { get set }
 }
 
-public struct SecondTestComponent : Component, Equatable {
+public protocol HasF2 : Entity {
+    var f2: String { get set }
 }
-
-public enum CasedComponent : Component, Equatable {
-    case bareCase
-    case parameterCase(Int)
-}
-

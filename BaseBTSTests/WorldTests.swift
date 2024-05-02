@@ -10,13 +10,20 @@ import XCTest
 @testable import BaseBTS
 
 final class WorldTests: XCTestCase {
+    var e1: Entity1!
+    var e2: Entity2!
+    var e3: Entity3!
+    
     override func setUpWithError() throws {
+        e1 = Entity1(id: UUID(), f1: "Some String")
+        e2 = Entity2(id: UUID(), f2: "Another String")
+        e3 = Entity3(id: UUID(), f1: "A", f2: "B")
     }
-
+    
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-
+    
     func testBaseWorldIsEmpty() {
         let w = World()
         
@@ -24,69 +31,62 @@ final class WorldTests: XCTestCase {
     }
     
     func testBaseWorldHasOne() {
-        let w = World(entities: [Entity()])
+        let w = World()
+        
+        w.addEntity(e1)
         
         XCTAssertEqual(w.entities.count, 1)
     }
     
     func testBaseWorldHasTwo() {
-        let w = World(entities: [Entity(), Entity()])
+        let w = World()
         
-        XCTAssertEqual(w.entities.count, 2)
-    }
-    
-    func testBaseWorldHasOneThenTwo() {
-        let w = World(entities: [Entity()])
-        
-        XCTAssertEqual(w.entities.count, 1)
-        
-        w.addEntity(Entity())
-        
-        XCTAssertEqual(w.entities.count, 2)
-    }
-    
-    func testBaseWorldHasOneThenTwoThenOne() {
-        let w = World(entities: [Entity()])
-        
-        XCTAssertEqual(w.entities.count, 1)
-        
-        let e1 = Entity()
         w.addEntity(e1)
+        w.addEntity(e2)
         
         XCTAssertEqual(w.entities.count, 2)
-        
-        w.removeEntity(byId: e1.id)
-        
-        XCTAssertEqual(w.entities.count, 1)
     }
     
-    func testBaseWorldHasOneThenTwoThenOneThenNone() {
-        let e0 = Entity()
-        
-        let w = World(entities: [e0])
-        
-        XCTAssertEqual(w.entities.count, 1)
-        
-        let e1 = Entity()
-        w.addEntity(e1)
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        w.removeEntity(byId: e1.id)
-        
-        XCTAssertEqual(w.entities.count, 1)
-        
-        w.removeEntity(byId: e0.id)
+    func testBaseWorldAddsAndRemoves() {
+        let w = World()
         
         XCTAssertEqual(w.entities.count, 0)
         
-        XCTAssertTrue(w.isEmpty())
-    }
-
-    func testGetEntity() {
-        let e0 = Entity()
+        w.addEntity(e1)
         
-        let w = World(entities: [e0])
+        XCTAssertEqual(w.entities.count, 1)
+        
+        w.addEntity(e2)
+        
+        XCTAssertEqual(w.entities.count, 2)
+        
+        w.removeEntity(byId: e1.id)
+        
+        XCTAssertEqual(w.entities.count, 1)
+        
+        w.removeEntity(byId: e2.id)
+        
+        XCTAssertEqual(w.entities.count, 0)
+    }
+    
+    func testBaseWorldRemoveDoesntRemoveNothing() {
+        let w = World()
+        
+        XCTAssertEqual(w.entities.count, 0)
+        
+        w.addEntity(e1)
+        
+        XCTAssertEqual(w.entities.count, 1)
+        
+        w.removeEntity(byId: UUID())
+        
+        XCTAssertEqual(w.entities.count, 1)
+    }
+    
+    func testGetEntity() {
+        let w = World()
+        
+        w.addEntity(e1)
         
         XCTAssertEqual(w.entities.count, 1)
         
@@ -96,152 +96,23 @@ final class WorldTests: XCTestCase {
         
         let ex = es[0]
         
-        XCTAssertEqual(e0.id, ex.id)
+        XCTAssertEqual(e1.id, ex.id)
     }
     
     func testGetEntityByComponentQuery() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: TestComponent(name: "James"))
+        let w = World()
         
-        let e1 = Entity()
-        
-        let w = World(entities: [e0, e1])
+        w.addEntity(e1)
+        w.addEntity(e2)
         
         XCTAssertEqual(w.entities.count, 2)
         
-        let es = w.getEntities(byComponent: TestComponent.identifier)
+        let es = w.getEntities({ $0 as? HasF1 })
         
         XCTAssertEqual(es.count, 1)
         
         let ex = es[0]
         
-        XCTAssertEqual(e0.id, ex.id)
-    }
-    
-    func testGetEntityByComponentQueryAlternativeOrder() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: TestComponent(name: "James"))
-        
-        let e1 = Entity()
-        
-        let w = World(entities: [e1, e0])
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        let es = w.getEntities(byComponent: TestComponent.identifier)
-        
-        XCTAssertEqual(es.count, 1)
-        
-        let ex = es[0]
-        
-        XCTAssertEqual(e0.id, ex.id)
-    }
-    
-    func testGetEntityByCasedComponentQuery() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: CasedComponent.bareCase)
-        
-        let e1 = Entity()
-        
-        let w = World(entities: [e1, e0])
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        let es = w.getEntities(byComponent: CasedComponent.identifier)
-        
-        XCTAssertEqual(es.count, 1)
-        
-        let ex = es[0]
-        
-        XCTAssertEqual(e0.id, ex.id)
-    }
-    
-    func testGetEntityByCasedComponentSpecificQuery() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: CasedComponent.bareCase)
-        
-        let e1 = Entity()
-        
-        let w = World(entities: [e1, e0])
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        let es = w.getEntities(byComponent: CasedComponent.identifier, {
-            guard case CasedComponent.bareCase = $0 else {
-                return false
-            }
-            
-            return true
-        })
-        
-        XCTAssertEqual(es.count, 1)
-        
-        let ex = es[0]
-        
-        XCTAssertEqual(e0.id, ex.id)
-    }
-    
-    func testGetEntityByCasedComponentSpecificNegativeQuery() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: CasedComponent.bareCase)
-        
-        let e1 = Entity()
-        
-        let w = World(entities: [e1, e0])
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        let es = w.getEntities(byComponent: CasedComponent.identifier, {
-            guard case CasedComponent.parameterCase(_) = $0 else {
-                return false
-            }
-            
-            return true
-        })
-        
-        XCTAssertEqual(es.count, 0)
-    }
-    
-    func testGetEntityByCasedComponentSpecificAltQuery() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: CasedComponent.parameterCase(4))
-        
-        let e1 = Entity()
-        
-        let w = World(entities: [e1, e0])
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        let es = w.getEntities(byComponent: CasedComponent.identifier, {
-            guard case CasedComponent.bareCase = $0 else {
-                return false
-            }
-            
-            return true
-        })
-        
-        XCTAssertEqual(es.count, 0)
-    }
-    
-    func testGetEntityByCasedComponentSpecificAlt2Query() {
-        var e0 = Entity()
-        e0.addOrUpdate(component: CasedComponent.parameterCase(4))
-        
-        let e1 = Entity()
-        
-        let w = World(entities: [e1, e0])
-        
-        XCTAssertEqual(w.entities.count, 2)
-        
-        let es = w.getEntities(byComponent: CasedComponent.identifier, {
-            guard case CasedComponent.parameterCase(_) = $0 else {
-                return false
-            }
-            
-            return true
-        })
-        
-        XCTAssertEqual(es.count, 1)
-        XCTAssertEqual(es[0].id, e0.id)
+        XCTAssertEqual(e1.id, ex.id)
     }
 }

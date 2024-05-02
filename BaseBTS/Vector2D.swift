@@ -7,32 +7,56 @@
 
 import Foundation
 
-public typealias Vector2D = (x: Float, y: Float)
-
-public func zero() -> Vector2D {
-    (x: 0.0, y: 0.0)
+public struct Vector2D {
+    var x: Float
+    var y: Float
 }
 
-public func magnitude(_ input: Vector2D) -> Float {
-    sqrtf(input.x * input.x + input.y * input.y)
-}
+extension Vector2D {
+    init(x: Int, y: Int) {
+        self.x = Float(x)
+        self.y = Float(y)        
+    }
+    
+    init(_ input: (x: Int, y: Int)) {
+        self.x = Float(input.x)
+        self.y = Float(input.y)
+    }
+    
+    func asRoundedPieces() -> (x: Int, y: Int) {
+        (Int(x.rounded(.toNearestOrAwayFromZero)), Int(y.rounded(.toNearestOrAwayFromZero)))
+    }
+    
+    static func zero() -> Vector2D {
+        Vector2D(x: 0.0, y: 0.0)
+    }
 
-public func distance(from: Vector2D, to: Vector2D) -> Float {
-    sqrtf(powf(from.x - to.x, 2) + powf(from.y - to.y, 2))
-}
+    func magnitude() -> Float {
+        sqrtf(x * x + y * y)
+    }
 
-public func normalize(_ input: Vector2D) -> Vector2D {
-    divide(input, by: magnitude(input))
-}
+    func distance(to: Vector2D) -> Float {
+        sqrtf(powf(x - to.x, 2) + powf(y - to.y, 2))
+    }
 
-public func subtract(take: Vector2D, from: Vector2D) -> Vector2D {
-    (x: from.x - take.x, from.y - take.y)
-}
+    func normalize() -> Vector2D {
+        divide(by: magnitude())
+    }
 
-public func multiply(_ input: Vector2D, by: Float) -> Vector2D {
-    (x: input.x * by, y: input.y * by)
-}
+    func subtract(from: Vector2D) -> Vector2D {
+        Vector2D(x: from.x - self.x, y: from.y - self.y)
+    }
 
-public func divide(_ input: Vector2D, by: Float) -> Vector2D {
-    (x: input.x / by, y: input.y / by)
+    func multiply(by: Float) -> Vector2D {
+        Vector2D(x: self.x * by, y: self.y * by)
+    }
+
+    func divide(by: Float) -> Vector2D {
+        Vector2D(x: self.x / by, y: self.y / by)
+    }
+
+    func add(to: Vector2D) -> Vector2D {
+        Vector2D(x: self.x + to.x, y: self.y + to.y)
+    }
+
 }
